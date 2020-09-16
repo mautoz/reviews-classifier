@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS reviews_data (
     -- Google or Apple
     review_source       text,
     review_app          text,
+    review_date         TIMESTAMP not NULL,
     review              TEXT not NULL,
     -- up_vote se é de acessibilidade
     -- down_vote caso contrário
