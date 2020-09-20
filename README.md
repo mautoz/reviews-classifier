@@ -1,3 +1,13 @@
+![EACH-USP](./img/each.png)
+
 # ACH2018 - PSGII
 
-Em construção
+## Requisitos
+
+python 3.7
+
+## Configurações do PC
+
+- SO: Ubuntu 18.04.5 LTS
+- Memória: 8 GB
+- Processador: Intel i5
