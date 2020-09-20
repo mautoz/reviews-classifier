@@ -7,3 +7,9 @@ export postgres_password=
 export postgres_port=15432
 
 python3 main.py
+
+unset postgres_host
+unset postgres_db
+unset postgres_user
+unset postgres_password
+unset postgres_port

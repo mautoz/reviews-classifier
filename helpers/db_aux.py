@@ -7,3 +7,6 @@ def connect_db(db_credentials):
     print("Conectando ao BD!")
     yield conn
     conn.close()
+
+def busca(conn):
+    print("Terminar função")
