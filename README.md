@@ -4,7 +4,8 @@
 
 ## Requisitos
 
-python 3.7
+- python 3.7
+- Postgres >=10.14
 
 ## Configurações do PC
 

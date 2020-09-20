@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS reviews_data (
     id                  SERIAL NOT NULL PRIMARY KEY,
-    user_name           text,
+    scraper_date        TIMESTAMP not NULL,
 
+    user_name           text,
     -- Google or Apple
     review_source       text,
     review_app          text,
