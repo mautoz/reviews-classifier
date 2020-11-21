@@ -6,15 +6,21 @@ CREATE TABLE IF NOT EXISTS reviews_data (
     -- Google or Apple
     review_source       text,
     review_app          text,
+    review_language     text,
     review_date         TIMESTAMP not NULL,
-    review              TEXT not NULL,
-    -- up_vote se é de acessibilidade
-    -- down_vote caso contrário
-    up_vote             INTEGER DEFAULT 0, 
-    down_vote           INTEGER DEFAULT 0,
+    review_raw          TEXT not NULL,
+    review_formatted    TEXT not NULL,
+    
+    -- O default -1 significa que o review ainda não foi avaliado
+    -- Se for 0, quer dizer que não é de acessibilidade.
+    -- Caso seja 1, é de acessibilidade.
+    is_a11y_human       INTEGER DEFAULT -1, 
+    is_a11y_machine     INTEGER DEFAULT -1,
 
 );
 
+
+-- A(eleven)y
 CREATE TABLE IF NOT EXISTS a11y_words (
     -- Accessibility (a11y)
 
