@@ -19,4 +19,3 @@ def find_app_name(id):
 
 for linha in range(len(reviews)):
     print(f'{find_app_name(reviews["app_id"][linha])} - {reviews["content"][linha]}')
-

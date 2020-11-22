@@ -1,5 +1,19 @@
+from datetime import date
+import re
 import pandas as pd
-from helpers import format_aux
+import os
+import datetime
+from helpers import format_aux, db_aux
+
+db_credentials = {
+    'host' : os.getenv('POSTGRES_HOST'),
+    'dbname' : os.getenv('POSTGRES_DATABASE'),
+    'user' : os.getenv('POSTGRES_USER'),
+    'password' : os.getenv('POSTGRES_PASSWORD'),
+    'port' : os.getenv('POSTGRES_PORT') 
+}
+
+
 
 # Google play store apps reviews 
 # Header do CSV: reviewId, userName, userImage, content, score, thumbsUpCount
@@ -20,23 +34,20 @@ def find_app_name(appId):
     return name_line.applymap(str).iloc[0,1]
 
 
+with db_aux.connect_db(db_credentials) as conn:
+    for linha in range(len(reviews)):
+        review = {}
+        review["scraper_date"] = datetime.datetime.now()
+        review["source"] = "Google"
+        review["app_name"] = str(find_app_name(reviews["app_Id"][linha])).strip()
+        review["language"] = "en"
+        review["review_content"] = reviews["content"][linha]
+        print(review)
+        db_aux.insert_db(conn, "reviews_data", review)
+        # print(f'{reviews["content"][linha]} - {find_app_name(reviews["app_Id"][linha])}')
 
-
-
-
-
-for linha in range(len(reviews)):
-    print(f'{reviews["content"][linha]} - {find_app_name(reviews["app_Id"][linha])}')
+    example = db_aux.search_file(conn, "reviews_data", 8)
+    print(f'{example[0]} - {example[1]}')
+    
 
 print(len(reviews))
-
-# print(reviews["userName"][0])
-
-# print(len(reviews))
-
-
-# for line in range(len(reviews)):
-#     print(f'{reviews["content"][line]} - {reviews["score"][line]} - {reviews["app_Id"][line]}')
-
-
-
