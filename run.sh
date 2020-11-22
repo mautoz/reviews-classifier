@@ -1,12 +1,14 @@
 #! /bin/bash
 
-export postgres_host=localhost
-export postgres_db=reviews-data
-export postgres_user=postgres
-export postgres_password=
-export postgres_port=15432
+export POSTGRES_HOST=localhost
+export POSTGRES_DATABASE=reviews-classifier
+export POSTGRES_USER=postgres
+export POSTGRES_PASSWORD=versatushpc
+export POSTGRES_PORT=5432
 
-python3 main.py
+# python3 main.py
+# python3 google_apps_extended_reader.py
+python3 google_apps_reader.py
 
 unset postgres_host
 unset postgres_db
