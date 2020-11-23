@@ -6,8 +6,8 @@ export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=versatushpc
 export POSTGRES_PORT=5432
 
-# python3 main.py
-# python3 google_apps_extended_reader.py
+python3 android_app_dataset_reader.py
+python3 google_apps_extended_reader.py
 python3 google_apps_reader.py
 
 unset postgres_host
