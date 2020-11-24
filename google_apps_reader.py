@@ -19,7 +19,7 @@ db_credentials = {
 # reviewCreatedVersion, at, replyContent, repliedAt, app_Id
 # Para poupar memória, é selecionado somente as colunas necessárias
 reviews_columns = ['content', 'app_Id']
-reviews = pd.read_csv('csv/Google_Play_Store_Apps_Reviews/google_play_store_apps_reviews.csv', usecols=reviews_columns, nrows=6)
+reviews = pd.read_csv('csv/Google_Play_Store_Apps_Reviews/google_play_store_apps_reviews.csv', usecols=reviews_columns)
 
 # Selecionando as colunas que interessam no CSV com o nome dos APPs e abrindo o CSV
 appId_columns = ['appId', 'title']

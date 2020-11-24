@@ -5,8 +5,8 @@ import unidecode
 # Exemplo: 
 # input: BOtão difÍcil de LoCaliZar
 # output: botao dificil de localizar
-def formatar_palavra_chave(palavra):
+def formatar_texto(palavra):
     return unidecode.unidecode(palavra).lower()
 
 
-print(formatar_palavra_chave("Botão difícil de Localizar"))
+# print(formatar_texto("Botão difícil de Localizar"))

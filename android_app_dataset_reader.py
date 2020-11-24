@@ -17,7 +17,7 @@ db_credentials = {
 # Google play store apps reviews 
 # Colunas no header do CSV que realmente importam: commentapp_id,content
 reviews_columns = ['app_id', 'content']
-reviews = pd.read_csv('csv/Android_App_Dataset/comment.csv', usecols=reviews_columns, nrows=6)
+reviews = pd.read_csv('csv/Android_App_Dataset/comment.csv', usecols=reviews_columns)
 
 # Selecionando as colunas que interessam no CSV com o nome dos APPs e abrindo o CSV
 appId_columns = ['id', 'app_name']
