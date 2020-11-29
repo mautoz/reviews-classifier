@@ -38,3 +38,9 @@ def search_file(conn, table, id):
     cur = conn.cursor()
     cur.execute(f"SELECT review_app, review_raw FROM {table} WHERE id={id}")
     return cur.fetchone()
+
+
+def fetch_reviews(conn):
+    cur = conn.cursor()
+    cur.execute(f"SELECT id, review_raw, is_a11y_human from reviews_data where is_a11y_human = 1 or is_a11y_human = 0")
+    return cur.fetchall()
