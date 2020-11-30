@@ -30,3 +30,7 @@ Bibliotecas
 2. É possível começar o treino de máquina com os reviews do Kaggle. No [README](./csv/README.md) da pasta csv é possível encontrar a fonte dos três bancos de dados usado. É só baixar e colocar os arquivos nas pastas correspondentes. São arquivos grandes, por essa razão, a inserção pode demorar bastante.
 
 3. 
+
+## DUMP do BD
+
+Após algum tempo, a classificação manual dos reviews foi encerrada e então foram feitos o cálculos apresentados na monografia. Para que os testes possam ser repetidos, foi feito um dump do db. O link está abaixo.
