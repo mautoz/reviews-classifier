@@ -31,6 +31,8 @@ Bibliotecas
 
 3. 
 
-## DUMP do BD
+## DUMP do banco de dados
 
 Após algum tempo, a classificação manual dos reviews foi encerrada e então foram feitos o cálculos apresentados na monografia. Para que os testes possam ser repetidos, foi feito um dump do db. O link está abaixo.
+
+[DUMP_reviews_data](https://drive.google.com/file/d/1F93ycz0607EPHUfGM3PwSn-izSD76Cll/view?usp=sharing)

@@ -107,7 +107,7 @@ frequencia = nltk.FreqDist(token_frase)
 
 print(frequencia)
 
-# Bag of words
+# Bag of words / Vetorizar
 # Visualizando no WordCloud
 # Tokenização
 # Tabela com as frequencias do token
