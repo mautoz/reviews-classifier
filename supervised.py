@@ -114,3 +114,4 @@ print(frequencia)
 # Stop Words
 # Stop word de pontuações
 # Normalização: retirar acentos
+# Deixar o radical

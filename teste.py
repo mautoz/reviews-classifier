@@ -76,6 +76,7 @@ print("---")
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
+
 def word_cloud_a11y(texto, coluna_texto):
     # Retorna as linhas que são de acessibilidade
     a11y_text = texto.query("a11y == 1")
@@ -146,7 +147,6 @@ def punctuation_array():
     marks = []
     for symbol in punctuation:
         marks.append(symbol)
-    print(marks)
     return marks
 
 
@@ -164,12 +164,14 @@ def stop_words_format(texto, coluna_texto, language):
     if language == "portuguese":
         irrelevant_words_no_accent = stopwords_no_accent()
         irrelevant_words = irrelevant_words + irrelevant_words_no_accent
-        print(irrelevant_words)
+    
+    print(irrelevant_words)
 
     frase_processada = []
     for review in texto[coluna_texto]:
         nova_frase = []
-        palavras_texto = token_espaco.tokenize(review)
+        review_lower = review.lower()
+        palavras_texto = token_espaco.tokenize(review_lower)
         for palavra in palavras_texto:
             if palavra not in irrelevant_words:
                 nova_frase.append(palavra)
@@ -184,10 +186,25 @@ def remove_punctuation(texto, coluna_texto):
     frase_processada = []
     for review in texto[coluna_texto]:
         nova_frase = []
+        # phrase_no_dots = re.sub("[\.]+", "", review)
         palavras_texto = token_pontuacao.tokenize(review)
         for palavra in palavras_texto:
             if palavra not in marks:
                 nova_frase.append(palavra)
+        frase_processada.append(' '.join(nova_frase))
+    return frase_processada
+
+
+def stemming_word(texto, coluna_texto):
+    stemmer = nltk.RSLPStemmer()
+    token_pontuacao = tokenize.WordPunctTokenizer()
+
+    frase_processada = []
+    for review in texto[coluna_texto]:
+        nova_frase = []
+        palavras_texto = token_pontuacao.tokenize(review)
+        for palavra in palavras_texto:
+            nova_frase.append(stemmer.stem(palavra))
         frase_processada.append(' '.join(nova_frase))
     return frase_processada
 
@@ -206,11 +223,58 @@ print("---")
 
 reviews["stop_words_punctuation"] = remove_punctuation(reviews, "stop_words")
 
-print(reviews.head())
-
 # Acurácia após retirar as stopwords
 print("---")
 print(classificar_texto(reviews, "stop_words_punctuation", "a11y"))
 print("---")
 
-stopwords_no_accent()
+
+reviews["stemming"] = stemming_word(reviews, "stop_words_punctuation")
+
+# Acurácia após retirar as stopwords
+
+
+word_frequency(reviews, "stemming", "stemming")
+
+from sklearn.feature_extraction.text import TfidfVectorizer 
+
+def classificar_texto_tfidf(texto, coluna_texto, coluna_classificacao):
+    tfidf = TfidfVectorizer(lowercase=False, max_features=50)
+    bag_of_words = tfidf.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    regressao_logistica = LogisticRegression()
+    regressao_logistica.fit(treino, classe_treino)
+    return regressao_logistica.score(teste, classe_teste)
+
+
+from nltk import ngrams
+
+def classificar_texto_ngrams(texto, coluna_texto, coluna_classificacao):
+    tfidf = TfidfVectorizer(lowercase=False, ngram_range= (1,2))
+    vector_tfidf = tfidf.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(vector_tfidf,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    regressao_logistica = LogisticRegression()
+    regressao_logistica.fit(treino, classe_treino)
+
+    # Colocar isso nos demais
+    pesos = pd.DataFrame(
+        regressao_logistica.coef_[0].T,
+        index = tfidf.get_feature_names()
+    )
+
+    return regressao_logistica.score(teste, classe_teste), pesos
+
+print("===")
+print(classificar_texto(reviews, "stemming", "a11y"))
+print("===")
+print(classificar_texto_tfidf(reviews, "stemming", "a11y"))
+print("===")
+acuracia, pesos = classificar_texto_ngrams(reviews, "stemming", "a11y")
+print(acuracia)
+print(pesos.nlargest(10,0))

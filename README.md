@@ -10,7 +10,8 @@ Aqui estão os códigos utilizados para o machine learing.
 - Postgres >=10.14
 - Python 3.7
 
-Bibliotecas 
+Bibliotecas
+- Scikit-learn 
 - NLTK
 - WordCloud
 - psycopg2 2.8.6
