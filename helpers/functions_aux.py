@@ -1,4 +1,52 @@
 import unidecode
+import seaborn as sns
+from nltk import tokenize
+import matplotlib.pyplot as plt
+import nltk
+from wordcloud import WordCloud
+
+
+def word_cloud_a11y(texto, coluna_texto):
+    # Retorna as linhas que são de acessibilidade
+    a11y_text = texto.query("a11y == 1")
+    todas_palavras = ' '.join([texto for texto in a11y_text[coluna_texto]])
+
+    nuvem_palavra = WordCloud(
+        width=800, 
+        height=600,
+        max_font_size=110,
+        collocations=False).generate(todas_palavras)
+
+    plt.figure(figsize=(10,7))
+    plt.imshow(nuvem_palavra, interpolation='bilinear')
+    plt.axis("off")
+    plt.savefig("./img/cloud.png")
+
+
+def word_frequency(reviews, coluna_texto, fase):
+    a11y_text = reviews.query("a11y == 1")
+    todas_palavras = ' '.join([texto for texto in a11y_text[coluna_texto]])
+
+    token_espaco = tokenize.WhitespaceTokenizer()
+    token_frase = token_espaco.tokenize(todas_palavras)
+    frequencia = nltk.FreqDist(token_frase)
+
+    df_frequencia = pd.DataFrame({"Palavras": list(frequencia.keys()),
+                                  "Frequencia": list(frequencia.values())})
+
+    plt.figure(figsize=(12,8))
+    ax = sns.barplot(
+        data = df_frequencia.nlargest(columns="Frequencia", n=20), 
+        x="Palavras", 
+        y="Frequencia",
+        color="blue")
+
+    ax.set(ylabel="Contagem")
+
+    nome = f'./img/frequencia_{fase}.png'
+    plt.savefig(nome)
+
+
 
 
 

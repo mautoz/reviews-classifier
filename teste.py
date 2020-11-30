@@ -3,7 +3,8 @@ import os
 import re
 import unidecode
 
-from helpers import db_aux
+
+from helpers import db_aux, functions_aux
 
 db_credentials = {
     'host' : os.getenv('POSTGRES_HOST'),
@@ -73,27 +74,8 @@ print("---")
 print(classificar_texto(reviews, "reviews_raw", "a11y"))
 print("---")
 
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 
-
-def word_cloud_a11y(texto, coluna_texto):
-    # Retorna as linhas que são de acessibilidade
-    a11y_text = texto.query("a11y == 1")
-    todas_palavras = ' '.join([texto for texto in a11y_text[coluna_texto]])
-
-    nuvem_palavra = WordCloud(
-        width=800, 
-        height=600,
-        max_font_size=110,
-        collocations=False).generate(todas_palavras)
-
-    plt.figure(figsize=(10,7))
-    plt.imshow(nuvem_palavra, interpolation='bilinear')
-    plt.axis("off")
-    plt.savefig("cloud.png")
-
-# word_cloud_a11y(reviews, "reviews_raw")
+functions_aux.word_cloud_a11y(reviews, "reviews_raw")
 
 import nltk 
 from nltk import tokenize
@@ -112,33 +94,9 @@ df_frequencia = pd.DataFrame({"Palavra": list(frequencia.keys()),
 
 # print(df_frequencia.nlargest(columns = "Frequencia", n = 20))
 
-import seaborn as sns
-
-def word_frequency(df_frequencia, coluna_texto, fase):
-    a11y_text = reviews.query("a11y == 1")
-    todas_palavras = ' '.join([texto for texto in a11y_text[coluna_texto]])
-
-    token_espaco = tokenize.WhitespaceTokenizer()
-    token_frase = token_espaco.tokenize(todas_palavras)
-    frequencia = nltk.FreqDist(token_frase)
-
-    df_frequencia = pd.DataFrame({"Palavras": list(frequencia.keys()),
-                                  "Frequencia": list(frequencia.values())})
-
-    plt.figure(figsize=(12,8))
-    ax = sns.barplot(
-        data = df_frequencia.nlargest(columns="Frequencia", n=20), 
-        x="Palavras", 
-        y="Frequencia",
-        color="blue")
-
-    ax.set(ylabel="Contagem")
-
-    nome = f'frequencia_{fase}.png'
-    plt.savefig(nome)
 
 # Desenha o gráfico de barras
-# word_frequency(df_frequencia, "reviews_raw", "token")
+functions_aux.word_frequency(reviews, "reviews_raw", "token")
 
 from string import punctuation
 
@@ -214,7 +172,7 @@ reviews["stop_words"] = stop_words_format(reviews, "reviews_raw", "english")
 
 print(reviews.head())
 
-word_frequency(reviews, "stop_words", "stop_words")
+functions_aux.word_frequency(reviews, "stop_words", "stop_words")
 
 # Acurácia após retirar as stopwords
 print("---")
@@ -234,7 +192,7 @@ reviews["stemming"] = stemming_word(reviews, "stop_words_punctuation")
 # Acurácia após retirar as stopwords
 
 
-word_frequency(reviews, "stemming", "stemming")
+functions_aux.word_frequency(reviews, "stemming", "stemming")
 
 from sklearn.feature_extraction.text import TfidfVectorizer 
 
