@@ -12,8 +12,9 @@ export POSTGRES_PORT=5432
 # python3 google_apps_extended_reader.py
 # python3 android_app_dataset_reader.py
 
-#python3 supervised.py
-python3 teste.py
+python3 supervised.py
+# python3 teste.py
+# python3 unsupervised.py
 
 unset postgres_host
 unset postgres_db

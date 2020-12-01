@@ -48,7 +48,7 @@ def classificar_texto(texto, coluna_texto, coluna_classificacao):
     return regressao_logistica.score(teste, classe_teste)
 
 # Resultado da acurácia sem tratamento algum
-print("---")
+print("Acurácia sem tratamento: ")
 print(classificar_texto(reviews, "reviews_raw", "a11y"))
 print("---")
 
@@ -144,8 +144,15 @@ def stemming_word(texto, coluna_texto):
         frase_processada.append(' '.join(nova_frase))
     return frase_processada
 
+reviews["no_emojis"] = functions_aux.format_string(reviews, "reviews_raw")
+print(reviews.head())
+functions_aux.word_frequency(reviews, "no_emojis", "no_emojis")
+# Acurácia após retirar emojis
+print("Acurácia sem emojis: ")
+print(classificar_texto(reviews, "no_emojis", "a11y"))
+print("-+-")
 
-reviews["stop_words"] = stop_words_format(reviews, "reviews_raw", "english")
+reviews["stop_words"] = stop_words_format(reviews, "no_emojis", "english")
 # reviews["stop_words"] = stop_words_format(reviews, "reviews_raw", "portuguese")
 
 print(reviews.head())
@@ -153,14 +160,14 @@ print(reviews.head())
 functions_aux.word_frequency(reviews, "stop_words", "stop_words")
 
 # Acurácia após retirar as stopwords
-print("---")
+print("Acurácia Stop Words: ")
 print(classificar_texto(reviews, "stop_words", "a11y"))
 print("---")
 
 reviews["stop_words_punctuation"] = remove_punctuation(reviews, "stop_words")
 
 # Acurácia após retirar as stopwords
-print("---")
+print("Acurácia sem pontuação: ")
 print(classificar_texto(reviews, "stop_words_punctuation", "a11y"))
 print("---")
 

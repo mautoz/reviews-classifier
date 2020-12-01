@@ -4,6 +4,8 @@ from nltk import tokenize
 import matplotlib.pyplot as plt
 import nltk
 from wordcloud import WordCloud
+import pandas as pd
+import re
 
 
 def word_cloud_a11y(texto, coluna_texto):
@@ -47,15 +49,9 @@ def word_frequency(reviews, coluna_texto, fase):
     plt.savefig(nome)
 
 
-
-
-
 # Esta função foi retirada integralmente do site:
 # https://gist.github.com/slowkow/7a7f61f495e3dbb7e3d767f97bd7304b
 # Ela é útil pois muitos dos reviews contém emojis
-import pandas as pd
-import re
-
 def remove_emoji(string):
     emoji_pattern = re.compile("["
                            u"\U0001F600-\U0001F64F"  # emoticons
@@ -74,17 +70,18 @@ def remove_emoji(string):
 # Exemplo: 
 # input: BOtão difÍcil de LoCaliZar
 # output: botao dificil de localizar
-def formatar_texto(palavra):
+def format_text(palavra):
     return unidecode.unidecode(palavra).lower()
 
-def format_string(string_raw):
-    string_treatment_1 = remove_emoji(string_raw)
-    print(string_treatment_1)
-    string_treatment_2 = formatar_texto(string_treatment_1)
-    print(string_treatment_2)
-    return string_treatment_2
+def format_string(texto, coluna_texto):
+    frase_processada = []
+    for review in texto[coluna_texto]:
+        string_treatment_1 = remove_emoji(review)
+        # string_treatment_2 = format_text(string_treatment_1)
+        frase_processada.append(string_treatment_1)
+    return frase_processada
 
 
-string = "Botão difícil de Localizar So much it's so nice to play \U0001F5FF \U0001F6FF \U0001F1FF \U000027B0 \U0001F251"
-
-print(format_string(string))
+# string = "Botão difícil de Localizar So much it's so nice to play \U0001F5FF \U0001F6FF \U0001F1FF \U000027B0 \U0001F251"
+# print(f'Before: {string}')
+# print(f'After: {format_string(string)}')
