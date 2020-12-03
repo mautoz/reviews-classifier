@@ -211,11 +211,68 @@ def classificar_texto_ngrams(texto, coluna_texto, coluna_classificacao):
 
     return regressao_logistica.score(teste, classe_teste), pesos
 
+# print("===")
+# print(classificar_texto(reviews, "stemming", "a11y"))
+# print("===")
+# print(classificar_texto_tfidf(reviews, "stemming", "a11y"))
+# print("===")
+# acuracia, pesos = classificar_texto_ngrams(reviews, "stemming", "a11y")
+# print(acuracia)
+# print(pesos.nlargest(10,0))
+
+print("================================================================")
+
+from sklearn.linear_model import SGDClassifier
+
+def classificar_texto_sgdc(texto, coluna_texto, coluna_classificacao):
+    vetorizar = CountVectorizer(lowercase=False, max_features=50)
+    bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    sgdc = SGDClassifier()
+    sgdc.fit(treino, classe_treino)
+
+    return sgdc.score(teste, classe_teste)
+
 print("===")
-print(classificar_texto(reviews, "stemming", "a11y"))
-print("===")
-print(classificar_texto_tfidf(reviews, "stemming", "a11y"))
-print("===")
-acuracia, pesos = classificar_texto_ngrams(reviews, "stemming", "a11y")
+acuracia = classificar_texto_sgdc(reviews, "stemming", "a11y")
 print(acuracia)
-print(pesos.nlargest(10,0))
+
+print("================================================================")
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+
+def classificar_texto_kn(texto, coluna_texto, coluna_classificacao):
+    vetorizar = CountVectorizer(lowercase=False, max_features=50)
+    bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    kn = KNeighborsClassifier()
+    kn.fit(treino, classe_treino)
+
+    return kn.score(teste, classe_teste)
+
+print("===")
+acuracia = classificar_texto_kn(reviews, "stemming", "a11y")
+print(acuracia)
+
+def classificar_texto_svc(texto, coluna_texto, coluna_classificacao):
+    vetorizar = CountVectorizer(lowercase=False, max_features=50)
+    bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    svc = SVC()
+    svc.fit(treino, classe_treino)
+
+    return svc.score(teste, classe_teste)
+
+print("===")
+acuracia = classificar_texto_svc(reviews, "stemming", "a11y")
+print(acuracia)

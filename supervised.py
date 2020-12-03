@@ -1,7 +1,15 @@
-import pandas as pd 
 import os
 import re
 import unidecode
+import pandas as pd 
+from string import punctuation
+
+import nltk 
+from nltk import tokenize
+from sklearn.feature_extraction.text import TfidfVectorizer 
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 
 from helpers import db_aux, functions_aux
 
@@ -14,45 +22,11 @@ db_credentials = {
     'port' : os.getenv('POSTGRES_PORT') 
 }
 
-
-# Conecta no bd e busca todos os reviews que foram avaliados por humanos
-with db_aux.connect_db(db_credentials) as conn:
-    reviews = pd.DataFrame(db_aux.fetch_reviews(conn))
-    reviews.rename(columns={0: "id", 1: "reviews_raw", 2: "a11y"}, inplace=True)
-    print(reviews)
-
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-
-def classificar_texto(texto, coluna_texto, coluna_classificacao):
-    vetorizar = CountVectorizer(lowercase=False, max_features=50)
-    bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
-    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
-                                                              texto[coluna_classificacao],
-                                                              random_state = 42)
-
-    regressao_logistica = LogisticRegression()
-    regressao_logistica.fit(treino, classe_treino)
-    return regressao_logistica.score(teste, classe_teste)
-
-# Resultado da acurácia sem tratamento algum
-print("Acurácia sem tratamento: ")
-print(classificar_texto(reviews, "reviews_raw", "a11y"))
-# Desenha a nuvem de 'reviews_raw'
-functions_aux.word_cloud_a11y(reviews, "reviews_raw")
-# Desenha o gráfico de barras
-functions_aux.word_frequency(reviews, "reviews_raw", "token")
-print("---")
-
-import nltk 
-from nltk import tokenize
-
 # A linha abaixo deve ser executada na primeira vez, após o download pode comentar
 # para não ficar executando novamente.
 # nltk.download("all")
 
-from string import punctuation
+# Funções para o tratamento de texto
 
 # Vetor com pontuaçãoes como !, #, &...
 def punctuation_array():
@@ -127,36 +101,19 @@ def stemming_word(texto, coluna_texto):
         frase_processada.append(' '.join(nova_frase))
     return frase_processada
 
-reviews["no_emojis"] = functions_aux.format_string(reviews, "reviews_raw")
-# Acurácia após retirar emojis
-print("Acurácia sem emojis: ")
-print(classificar_texto(reviews, "no_emojis", "a11y"))
-# Desenha o gráfico de frequência sem emojis
-functions_aux.word_frequency(reviews, "no_emojis", "no_emojis")
-print("-+-")
+# Funções para testes dos modelos
 
-reviews["stop_words"] = stop_words_format(reviews, "no_emojis", "english")
-# reviews["stop_words"] = stop_words_format(reviews, "reviews_raw", "portuguese")
-# Acurácia após retirar as stopwords
-print("Acurácia Stop Words: ")
-print(classificar_texto(reviews, "stop_words", "a11y"))
-# Desenha o gráfico de frequências após retirar as stop_wprds
-functions_aux.word_frequency(reviews, "stop_words", "stop_words")
-print("---")
+def classificar_texto(texto, coluna_texto, coluna_classificacao):
+    vetorizar = CountVectorizer(lowercase=False, max_features=50)
+    bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
 
-reviews["stop_words_punctuation"] = remove_punctuation(reviews, "stop_words")
-# Acurácia após retirar as stopwords
-print("Acurácia sem pontuação: ")
-print(classificar_texto(reviews, "stop_words_punctuation", "a11y"))
-functions_aux.word_frequency(reviews, "stop_words_punctuation", "stop_words_punctuation")
-print("---")
+    regressao_logistica = LogisticRegression()
+    regressao_logistica.fit(treino, classe_treino)
+    return regressao_logistica.score(teste, classe_teste)
 
-reviews["stemming"] = stemming_word(reviews, "stop_words_punctuation")
-# Acurácia após retirar as stopwords
-functions_aux.word_frequency(reviews, "stemming", "stemming")
-
-
-from sklearn.feature_extraction.text import TfidfVectorizer 
 
 def classificar_texto_tfidf(texto, coluna_texto, coluna_classificacao):
     tfidf = TfidfVectorizer(lowercase=False, max_features=50)
@@ -188,6 +145,53 @@ def classificar_texto_ngrams(texto, coluna_texto, coluna_classificacao):
 
     return regressao_logistica.score(teste, classe_teste), pesos
 
+
+
+
+# Conecta no bd e busca todos os reviews que foram avaliados por humanos
+with db_aux.connect_db(db_credentials) as conn:
+    reviews = pd.DataFrame(db_aux.fetch_reviews(conn))
+    reviews.rename(columns={0: "id", 1: "reviews_raw", 2: "a11y"}, inplace=True)
+    print(reviews)
+
+
+# Resultado da acurácia sem tratamento algum
+print("Acurácia sem tratamento: ")
+print(classificar_texto(reviews, "reviews_raw", "a11y"))
+# Desenha a nuvem de 'reviews_raw'
+functions_aux.word_cloud_a11y(reviews, "reviews_raw")
+# Desenha o gráfico de barras
+functions_aux.word_frequency(reviews, "reviews_raw", "token")
+print("---")
+
+reviews["no_emojis"] = functions_aux.format_string(reviews, "reviews_raw")
+# Acurácia após retirar emojis
+print("Acurácia sem emojis: ")
+print(classificar_texto(reviews, "no_emojis", "a11y"))
+# Desenha o gráfico de frequência sem emojis
+functions_aux.word_frequency(reviews, "no_emojis", "no_emojis")
+print("-+-")
+
+reviews["stop_words"] = stop_words_format(reviews, "no_emojis", "english")
+# reviews["stop_words"] = stop_words_format(reviews, "reviews_raw", "portuguese")
+# Acurácia após retirar as stopwords
+print("Acurácia Stop Words: ")
+print(classificar_texto(reviews, "stop_words", "a11y"))
+# Desenha o gráfico de frequências após retirar as stop_wprds
+functions_aux.word_frequency(reviews, "stop_words", "stop_words")
+print("---")
+
+reviews["stop_words_punctuation"] = remove_punctuation(reviews, "stop_words")
+# Acurácia após retirar as stopwords
+print("Acurácia sem pontuação: ")
+print(classificar_texto(reviews, "stop_words_punctuation", "a11y"))
+functions_aux.word_frequency(reviews, "stop_words_punctuation", "stop_words_punctuation")
+print("---")
+
+reviews["stemming"] = stemming_word(reviews, "stop_words_punctuation")
+# Acurácia após retirar as stopwords
+functions_aux.word_frequency(reviews, "stemming", "stemming")
+
 print("===")
 print(classificar_texto(reviews, "stemming", "a11y"))
 print("===")
@@ -196,3 +200,28 @@ print("===")
 acuracia, pesos = classificar_texto_ngrams(reviews, "stemming", "a11y")
 print(acuracia)
 print(pesos.nlargest(10,0))
+
+# def start():
+#     pass
+
+# if __name__ == "__main__":
+#     start()
+
+#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+#     print(">> Logistic Regression")
+#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+
+#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+#     print(">> Support Vector Machine")
+#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+
+#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+#     print(">> K-nearest neighbors algorithm")
+#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+
+#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+#     print(">> Stochastic Gradient Descent")
+#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
