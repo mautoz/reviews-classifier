@@ -10,6 +10,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import SGDClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+
 
 from helpers import db_aux, functions_aux
 
@@ -97,7 +101,7 @@ def stemming_word(texto, coluna_texto):
 
 # Funções para testes dos modelos
 
-## Modelo: Logistic Regression - Vetorização: CountVectorizer
+## Modelo: Logistic Regression - Vetorização: Count Vectorizer
 def classificar_texto(texto, coluna_texto, coluna_classificacao):
     vetorizar = CountVectorizer(lowercase=False, max_features=50)
     bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
@@ -134,20 +138,130 @@ def classificar_texto_ngrams(texto, coluna_texto, coluna_classificacao):
     regressao_logistica = LogisticRegression()
     regressao_logistica.fit(treino, classe_treino)
 
-    # Colocar isso nos demais
-    pesos = pd.DataFrame(
-        regressao_logistica.coef_[0].T,
-        index = tfidf.get_feature_names()
-    )
+    return regressao_logistica.score(teste, classe_teste)
 
-    return regressao_logistica.score(teste, classe_teste), pesos
+
+## Modelo: Stochastic gradient descent - Vetorização: 
+def classificar_texto_sgdc(texto, coluna_texto, coluna_classificacao):
+    vetorizar = CountVectorizer(lowercase=False, max_features=50)
+    bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    sgdc = SGDClassifier()
+    sgdc.fit(treino, classe_treino)
+
+    return sgdc.score(teste, classe_teste)
+
+
+## Modelo: Stochastic gradient descent - Vetorização: Tfidf Vectorizer
+def classificar_texto_sgdc_tfidf(texto, coluna_texto, coluna_classificacao):
+    tfidf = TfidfVectorizer(lowercase=False, max_features=50)
+    bag_of_words = tfidf.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    sgdc = SGDClassifier()
+    sgdc.fit(treino, classe_treino)
+    return sgdc.score(teste, classe_teste)
+
+
+## Modelo: Stochastic gradient descent - Vetorização: Tfidf Vectorizer com ngram
+def classificar_texto_sgdc_ngrams(texto, coluna_texto, coluna_classificacao):
+    tfidf = TfidfVectorizer(lowercase=False, ngram_range= (1,2))
+    vector_tfidf = tfidf.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(vector_tfidf,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    sgdc = SGDClassifier()
+    sgdc.fit(treino, classe_treino)
+
+    return sgdc.score(teste, classe_teste)
 
 
 ## Modelo: Support vector machine - Vetorização: 
+def classificar_texto_svc(texto, coluna_texto, coluna_classificacao):
+    vetorizar = CountVectorizer(lowercase=False, max_features=50)
+    bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    svc = SVC()
+    svc.fit(treino, classe_treino)
+
+    return svc.score(teste, classe_teste)
+
+
+## Modelo: Support vector machine - Vetorização: Tfidf Vectorizer
+def classificar_texto_svc_tfidf(texto, coluna_texto, coluna_classificacao):
+    tfidf = TfidfVectorizer(lowercase=False, max_features=50)
+    bag_of_words = tfidf.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    svc = SVC()
+    svc.fit(treino, classe_treino)
+    return svc.score(teste, classe_teste)
+
+
+## Modelo: Support vector machine - Vetorização: Tfidf Vectorizer com ngram
+def classificar_texto_svc_ngrams(texto, coluna_texto, coluna_classificacao):
+    tfidf = TfidfVectorizer(lowercase=False, ngram_range= (1,2))
+    vector_tfidf = tfidf.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(vector_tfidf,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    svc = SVC()
+    svc.fit(treino, classe_treino)
+
+    return svc.score(teste, classe_teste)
+
 
 ## Modelo: K-nearest neighbors algorithm - Vetorização: 
+def classificar_texto_kn(texto, coluna_texto, coluna_classificacao):
+    vetorizar = CountVectorizer(lowercase=False, max_features=50)
+    bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
 
-## Modelo: Stochastic gradient descent - Vetorização: 
+    kn = KNeighborsClassifier()
+    kn.fit(treino, classe_treino)
+
+    return kn.score(teste, classe_teste)
+
+
+## Modelo: Support vector machine - Vetorização: Tfidf Vectorizer
+def classificar_texto_kn_tfidf(texto, coluna_texto, coluna_classificacao):
+    tfidf = TfidfVectorizer(lowercase=False, max_features=50)
+    bag_of_words = tfidf.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(bag_of_words,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    kn = KNeighborsClassifier()
+    kn.fit(treino, classe_treino)
+    return kn.score(teste, classe_teste)
+
+
+## Modelo: Support vector machine - Vetorização: Tfidf Vectorizer com ngram
+def classificar_texto_kn_ngrams(texto, coluna_texto, coluna_classificacao):
+    tfidf = TfidfVectorizer(lowercase=False, ngram_range= (1,2))
+    vector_tfidf = tfidf.fit_transform(texto[coluna_texto])
+    treino, teste, classe_treino, classe_teste = train_test_split(vector_tfidf,
+                                                              texto[coluna_classificacao],
+                                                              random_state = 42)
+
+    kn = KNeighborsClassifier()
+    kn.fit(treino, classe_treino)
+
+    return kn.score(teste, classe_teste)
 
 
 if __name__ == "__main__":
@@ -165,67 +279,221 @@ if __name__ == "__main__":
         reviews = pd.DataFrame(db_aux.fetch_reviews(conn))
         reviews.rename(columns={0: "id", 1: "reviews_raw", 2: "a11y"}, inplace=True)
 
-
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    print(">> Logistic Regression")
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-
-    # Resultado da acurácia sem tratamento algum
-    print("Acurácia sem tratamento: ")
-    print(classificar_texto(reviews, "reviews_raw", "a11y"))
     # Desenha a nuvem de 'reviews_raw'
     functions_aux.word_cloud_a11y(reviews, "reviews_raw")
     # Desenha o gráfico de barras
     functions_aux.word_frequency(reviews, "reviews_raw", "token")
-    print("---")
 
+    # Tratamento do texto em etapas
     reviews["no_emojis"] = functions_aux.format_string(reviews, "reviews_raw")
-    # Acurácia após retirar emojis
-    print("Acurácia sem emojis: ")
-    print(classificar_texto(reviews, "no_emojis", "a11y"))
     # Desenha o gráfico de frequência sem emojis
     functions_aux.word_frequency(reviews, "no_emojis", "no_emojis")
-    print("-+-")
 
     reviews["stop_words"] = stop_words_format(reviews, "no_emojis", "english")
     # reviews["stop_words"] = stop_words_format(reviews, "reviews_raw", "portuguese")
-    # Acurácia após retirar as stopwords
-    print("Acurácia Stop Words: ")
-    print(classificar_texto(reviews, "stop_words", "a11y"))
-    # Desenha o gráfico de frequências após retirar as stop_wprds
+
+    # Desenha o gráfico de frequências após retirar as stop_words
     functions_aux.word_frequency(reviews, "stop_words", "stop_words")
-    print("---")
 
     reviews["stop_words_punctuation"] = remove_punctuation(reviews, "stop_words")
-    # Acurácia após retirar as stopwords
-    print("Acurácia sem pontuação: ")
-    print(classificar_texto(reviews, "stop_words_punctuation", "a11y"))
+    # Desenha o gráfico de frequências após retirar as stop_words_punctuation
     functions_aux.word_frequency(reviews, "stop_words_punctuation", "stop_words_punctuation")
-    print("---")
 
     reviews["stemming"] = stemming_word(reviews, "stop_words_punctuation")
-    # Acurácia após retirar as stopwords
+    # Desenha o gráfico de frequências após retirar as stop_words_punctuation
     functions_aux.word_frequency(reviews, "stemming", "stemming")
 
-    print("Logistic Regression:")
+    # Impressão das acurácias
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">> Model: Logistic Regression")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+    # Resultado da acurácia sem tratamento algum
+    print("Acurácia sem tratamento (Count Vectorizer)")
+    print(classificar_texto(reviews, "reviews_raw", "a11y"))
+    print("Acurácia sem tratamento (Tfidf Vectorizer)")
+    print(classificar_texto_tfidf(reviews, "reviews_raw", "a11y"))
+    print("Acurácia sem tratamento (Tfidf Vectorizer ngram)")
+    print(classificar_texto_ngrams(reviews, "reviews_raw", "a11y"))
+
+    
+    # Acurácia após retirar emojis
+    print("Acurácia sem emojis (Count Vectorizer)")
+    print(classificar_texto(reviews, "no_emojis", "a11y"))
+    print("Acurácia sem emojis (Tfidf Vectorizer)")
+    print(classificar_texto_tfidf(reviews, "no_emojis", "a11y"))
+    print("Acurácia sem emojis (Tfidf Vectorizer ngram)")
+    print(classificar_texto_ngrams(reviews, "no_emojis", "a11y"))
+
+    
+    # Acurácia após retirar as stopwords
+    print("Acurácia Stop Words (Count Vectorizer Vectorizer)")
+    print(classificar_texto(reviews, "stop_words", "a11y"))
+    print("Acurácia Stop Words (Tfidf Vectorizer)")
+    print(classificar_texto_tfidf(reviews, "stop_words", "a11y"))
+    print("Acurácia Stop Words (Tfidf Vectorizer ngram)")
+    print(classificar_texto_ngrams(reviews, "stop_words", "a11y"))
+
+
+    # Acurácia após retirar as stop_words_punctuation
+    print("Acurácia sem pontuação (Count Vectorizer Vectorizer)")
+    print(classificar_texto(reviews, "stop_words_punctuation", "a11y"))
+    print("Acurácia sem pontuação (Tfidf Vectorizer)")
+    print(classificar_texto_tfidf(reviews, "stop_words_punctuation", "a11y"))
+    print("Acurácia sem pontuação (Tfidf Vectorizer ngram)")
+    print(classificar_texto_ngrams(reviews, "stop_words_punctuation", "a11y"))
+
+    
+    # Acurácia após retirar as stemming
+    print("Acurácia final - Após stemming (Count Vectorizer)")
     print(classificar_texto(reviews, "stemming", "a11y"))
-    print("Tfidf:")
+    print("Acurácia - Após stemming (Tfidf Vectorizer)")
     print(classificar_texto_tfidf(reviews, "stemming", "a11y"))
-    print("Tfidf ngram:")
-    acuracia, pesos = classificar_texto_ngrams(reviews, "stemming", "a11y")
-    print(acuracia)
-    print(pesos.nlargest(10,0))
-
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    print(">> Support Vector Machine")
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("Acurácia - Após stemming (Tfidf Vectorizer ngram)")
+    print(classificar_texto_ngrams(reviews, "stemming", "a11y"))
 
 
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    print(">> K-nearest neighbors algorithm")
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">> Model: K-nearest neighbors algorithm")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+    # Resultado da acurácia sem tratamento algum
+    print("Acurácia sem tratamento (Count Vectorizer)")
+    print(classificar_texto_kn(reviews, "reviews_raw", "a11y"))
+    print("Acurácia sem tratamento (Tfidf Vectorizer)")
+    print(classificar_texto_kn_tfidf(reviews, "reviews_raw", "a11y"))
+    print("Acurácia sem tratamento (Tfidf Vectorizer ngram)")
+    print(classificar_texto_kn_ngrams(reviews, "reviews_raw", "a11y"))
+
+    
+    # Acurácia após retirar emojis
+    print("Acurácia sem emojis (Count Vectorizer)")
+    print(classificar_texto_kn(reviews, "no_emojis", "a11y"))
+    print("Acurácia sem emojis (Tfidf Vectorizer)")
+    print(classificar_texto_kn_tfidf(reviews, "no_emojis", "a11y"))
+    print("Acurácia sem emojis (Tfidf Vectorizer ngram)")
+    print(classificar_texto_kn_ngrams(reviews, "no_emojis", "a11y"))
+
+    
+    # Acurácia após retirar as stopwords
+    print("Acurácia Stop Words (Count Vectorizer Vectorizer)")
+    print(classificar_texto_kn(reviews, "stop_words", "a11y"))
+    print("Acurácia Stop Words (Tfidf Vectorizer)")
+    print(classificar_texto_kn_tfidf(reviews, "stop_words", "a11y"))
+    print("Acurácia Stop Words (Tfidf Vectorizer ngram)")
+    print(classificar_texto_kn_ngrams(reviews, "stop_words", "a11y"))
+    
+
+    # Acurácia após retirar as stop_words_punctuation
+    print("Acurácia sem pontuação (Count Vectorizer Vectorizer)")
+    print(classificar_texto_kn(reviews, "stop_words_punctuation", "a11y"))
+    print("Acurácia sem pontuação (Tfidf Vectorizer)")
+    print(classificar_texto_kn_tfidf(reviews, "stop_words_punctuation", "a11y"))
+    print("Acurácia sem pontuação (Tfidf Vectorizer ngram)")
+    print(classificar_texto_kn_ngrams(reviews, "stop_words_punctuation", "a11y"))
+
+    
+    # Acurácia após retirar as stemming
+    print("Acurácia final - Após stemming (Count Vectorizer)")
+    print(classificar_texto_kn(reviews, "stemming", "a11y"))
+    print("Acurácia - Após stemming (Tfidf Vectorizer)")
+    print(classificar_texto_kn_tfidf(reviews, "stemming", "a11y"))
+    print("Acurácia - Após stemming (Tfidf Vectorizer ngram)")
+    print(classificar_texto_kn_ngrams(reviews, "stemming", "a11y"))
 
 
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    print(">> Stochastic Gradient Descent")
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">> Model: Support Vector Machine")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    
+    # Resultado da acurácia sem tratamento algum
+    print("Acurácia sem tratamento (Count Vectorizer)")
+    print(classificar_texto_svc(reviews, "reviews_raw", "a11y"))
+    print("Acurácia sem tratamento (Tfidf Vectorizer)")
+    print(classificar_texto_svc_tfidf(reviews, "reviews_raw", "a11y"))
+    print("Acurácia sem tratamento (Tfidf Vectorizer ngram)")
+    print(classificar_texto_svc_ngrams(reviews, "reviews_raw", "a11y"))
+
+    
+    # Acurácia após retirar emojis
+    print("Acurácia sem emojis (Count Vectorizer)")
+    print(classificar_texto_svc(reviews, "no_emojis", "a11y"))
+    print("Acurácia sem emojis (Tfidf Vectorizer)")
+    print(classificar_texto_svc_tfidf(reviews, "no_emojis", "a11y"))
+    print("Acurácia sem emojis (Tfidf Vectorizer ngram)")
+    print(classificar_texto_svc_ngrams(reviews, "no_emojis", "a11y"))
+
+    
+    # Acurácia após retirar as stopwords
+    print("Acurácia Stop Words (Count Vectorizer Vectorizer)")
+    print(classificar_texto_svc(reviews, "stop_words", "a11y"))
+    print("Acurácia Stop Words (Tfidf Vectorizer)")
+    print(classificar_texto_svc_tfidf(reviews, "stop_words", "a11y"))
+    print("Acurácia Stop Words (Tfidf Vectorizer ngram)")
+    print(classificar_texto_svc_ngrams(reviews, "stop_words", "a11y"))
+
+
+    # Acurácia após retirar as stop_words_punctuation
+    print("Acurácia sem pontuação (Count Vectorizer Vectorizer)")
+    print(classificar_texto_svc(reviews, "stop_words_punctuation", "a11y"))
+    print("Acurácia sem pontuação (Tfidf Vectorizer)")
+    print(classificar_texto_svc_tfidf(reviews, "stop_words_punctuation", "a11y"))
+    print("Acurácia sem pontuação (Tfidf Vectorizer ngram)")
+    print(classificar_texto_svc_ngrams(reviews, "stop_words_punctuation", "a11y"))
+
+    
+    # Acurácia após retirar as stemming
+    print("Acurácia final - Após stemming (Count Vectorizer)")
+    print(classificar_texto_svc(reviews, "stemming", "a11y"))
+    print("Acurácia - Após stemming (Tfidf Vectorizer)")
+    print(classificar_texto_svc_tfidf(reviews, "stemming", "a11y"))
+    print("Acurácia - Após stemming (Tfidf Vectorizer ngram)")
+    print(classificar_texto_svc_tfidf(reviews, "stemming", "a11y"))
+
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">> Model: Stochastic Gradient Descent")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+    # Resultado da acurácia sem tratamento algum
+    print("Acurácia sem tratamento (Count Vectorizer)")
+    print(classificar_texto_sgdc(reviews, "reviews_raw", "a11y"))
+    print("Acurácia sem tratamento (Tfidf Vectorizer)")
+    print(classificar_texto_sgdc_tfidf(reviews, "reviews_raw", "a11y"))
+    print("Acurácia sem tratamento (Tfidf Vectorizer ngram)")
+    print(classificar_texto_sgdc_ngrams(reviews, "reviews_raw", "a11y"))
+
+    
+    # Acurácia após retirar emojis
+    print("Acurácia sem emojis (Count Vectorizer)")
+    print(classificar_texto_sgdc(reviews, "no_emojis", "a11y"))
+    print("Acurácia sem emojis (Tfidf Vectorizer)")
+    print(classificar_texto_sgdc_tfidf(reviews, "no_emojis", "a11y"))
+    print("Acurácia sem emojis (Tfidf Vectorizer ngram)")
+    print(classificar_texto_sgdc_ngrams(reviews, "no_emojis", "a11y"))
+
+    
+    # Acurácia após retirar as stopwords
+    print("Acurácia Stop Words (Count Vectorizer Vectorizer)")
+    print(classificar_texto_sgdc(reviews, "stop_words", "a11y"))
+    print("Acurácia Stop Words (Tfidf Vectorizer)")
+    print(classificar_texto_sgdc_tfidf(reviews, "stop_words", "a11y"))
+    print("Acurácia Stop Words (Tfidf Vectorizer ngram)")
+    print(classificar_texto_sgdc_ngrams(reviews, "stop_words", "a11y"))
+
+
+    # Acurácia após retirar as stop_words_punctuation
+    print("Acurácia sem pontuação (Count Vectorizer Vectorizer)")
+    print(classificar_texto_sgdc(reviews, "stop_words_punctuation", "a11y"))
+    print("Acurácia sem pontuação (Tfidf Vectorizer)")
+    print(classificar_texto_sgdc_tfidf(reviews, "stop_words_punctuation", "a11y"))
+    print("Acurácia sem pontuação (Tfidf Vectorizer ngram)")
+    print(classificar_texto_sgdc_ngrams(reviews, "stop_words_punctuation", "a11y"))
+
+    
+    # Acurácia após retirar as stemming
+    print("Acurácia final - Após stemming (Count Vectorizer)")
+    print(classificar_texto_sgdc(reviews, "stemming", "a11y"))
+    print("Acurácia - Após stemming (Tfidf Vectorizer)")
+    print(classificar_texto_sgdc_tfidf(reviews, "stemming", "a11y"))
+    print("Acurácia - Após stemming (Tfidf Vectorizer ngram)")
+    print(classificar_texto_sgdc_ngrams(reviews, "stemming", "a11y"))
