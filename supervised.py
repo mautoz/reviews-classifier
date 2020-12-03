@@ -14,17 +14,10 @@ from sklearn.linear_model import LogisticRegression
 from helpers import db_aux, functions_aux
 
 
-db_credentials = {
-    'host' : os.getenv('POSTGRES_HOST'),
-    'dbname' : os.getenv('POSTGRES_DATABASE'),
-    'user' : os.getenv('POSTGRES_USER'),
-    'password' : os.getenv('POSTGRES_PASSWORD'),
-    'port' : os.getenv('POSTGRES_PORT') 
-}
-
 # A linha abaixo deve ser executada na primeira vez, após o download pode comentar
 # para não ficar executando novamente.
 # nltk.download("all")
+
 
 # Funções para o tratamento de texto
 
@@ -101,8 +94,10 @@ def stemming_word(texto, coluna_texto):
         frase_processada.append(' '.join(nova_frase))
     return frase_processada
 
+
 # Funções para testes dos modelos
 
+## Modelo: Logistic Regression - Vetorização: CountVectorizer
 def classificar_texto(texto, coluna_texto, coluna_classificacao):
     vetorizar = CountVectorizer(lowercase=False, max_features=50)
     bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
@@ -115,6 +110,7 @@ def classificar_texto(texto, coluna_texto, coluna_classificacao):
     return regressao_logistica.score(teste, classe_teste)
 
 
+## Modelo: Logistic Regression - Vetorização: Tfidf Vectorizer
 def classificar_texto_tfidf(texto, coluna_texto, coluna_classificacao):
     tfidf = TfidfVectorizer(lowercase=False, max_features=50)
     bag_of_words = tfidf.fit_transform(texto[coluna_texto])
@@ -127,6 +123,7 @@ def classificar_texto_tfidf(texto, coluna_texto, coluna_classificacao):
     return regressao_logistica.score(teste, classe_teste)
 
 
+## Modelo: Logistic Regression - Vetorização: Tfidf Vectorizer com ngram
 def classificar_texto_ngrams(texto, coluna_texto, coluna_classificacao):
     tfidf = TfidfVectorizer(lowercase=False, ngram_range= (1,2))
     vector_tfidf = tfidf.fit_transform(texto[coluna_texto])
@@ -146,82 +143,89 @@ def classificar_texto_ngrams(texto, coluna_texto, coluna_classificacao):
     return regressao_logistica.score(teste, classe_teste), pesos
 
 
+## Modelo: Support vector machine - Vetorização: 
+
+## Modelo: K-nearest neighbors algorithm - Vetorização: 
+
+## Modelo: Stochastic gradient descent - Vetorização: 
 
 
-# Conecta no bd e busca todos os reviews que foram avaliados por humanos
-with db_aux.connect_db(db_credentials) as conn:
-    reviews = pd.DataFrame(db_aux.fetch_reviews(conn))
-    reviews.rename(columns={0: "id", 1: "reviews_raw", 2: "a11y"}, inplace=True)
-    print(reviews)
+if __name__ == "__main__":
+
+    db_credentials = {
+        'host' : os.getenv('POSTGRES_HOST'),
+        'dbname' : os.getenv('POSTGRES_DATABASE'),
+        'user' : os.getenv('POSTGRES_USER'),
+        'password' : os.getenv('POSTGRES_PASSWORD'),
+        'port' : os.getenv('POSTGRES_PORT') 
+    }
+
+    # Conecta no bd e busca todos os reviews que foram avaliados por humanos
+    with db_aux.connect_db(db_credentials) as conn:
+        reviews = pd.DataFrame(db_aux.fetch_reviews(conn))
+        reviews.rename(columns={0: "id", 1: "reviews_raw", 2: "a11y"}, inplace=True)
 
 
-# Resultado da acurácia sem tratamento algum
-print("Acurácia sem tratamento: ")
-print(classificar_texto(reviews, "reviews_raw", "a11y"))
-# Desenha a nuvem de 'reviews_raw'
-functions_aux.word_cloud_a11y(reviews, "reviews_raw")
-# Desenha o gráfico de barras
-functions_aux.word_frequency(reviews, "reviews_raw", "token")
-print("---")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">> Logistic Regression")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
-reviews["no_emojis"] = functions_aux.format_string(reviews, "reviews_raw")
-# Acurácia após retirar emojis
-print("Acurácia sem emojis: ")
-print(classificar_texto(reviews, "no_emojis", "a11y"))
-# Desenha o gráfico de frequência sem emojis
-functions_aux.word_frequency(reviews, "no_emojis", "no_emojis")
-print("-+-")
+    # Resultado da acurácia sem tratamento algum
+    print("Acurácia sem tratamento: ")
+    print(classificar_texto(reviews, "reviews_raw", "a11y"))
+    # Desenha a nuvem de 'reviews_raw'
+    functions_aux.word_cloud_a11y(reviews, "reviews_raw")
+    # Desenha o gráfico de barras
+    functions_aux.word_frequency(reviews, "reviews_raw", "token")
+    print("---")
 
-reviews["stop_words"] = stop_words_format(reviews, "no_emojis", "english")
-# reviews["stop_words"] = stop_words_format(reviews, "reviews_raw", "portuguese")
-# Acurácia após retirar as stopwords
-print("Acurácia Stop Words: ")
-print(classificar_texto(reviews, "stop_words", "a11y"))
-# Desenha o gráfico de frequências após retirar as stop_wprds
-functions_aux.word_frequency(reviews, "stop_words", "stop_words")
-print("---")
+    reviews["no_emojis"] = functions_aux.format_string(reviews, "reviews_raw")
+    # Acurácia após retirar emojis
+    print("Acurácia sem emojis: ")
+    print(classificar_texto(reviews, "no_emojis", "a11y"))
+    # Desenha o gráfico de frequência sem emojis
+    functions_aux.word_frequency(reviews, "no_emojis", "no_emojis")
+    print("-+-")
 
-reviews["stop_words_punctuation"] = remove_punctuation(reviews, "stop_words")
-# Acurácia após retirar as stopwords
-print("Acurácia sem pontuação: ")
-print(classificar_texto(reviews, "stop_words_punctuation", "a11y"))
-functions_aux.word_frequency(reviews, "stop_words_punctuation", "stop_words_punctuation")
-print("---")
+    reviews["stop_words"] = stop_words_format(reviews, "no_emojis", "english")
+    # reviews["stop_words"] = stop_words_format(reviews, "reviews_raw", "portuguese")
+    # Acurácia após retirar as stopwords
+    print("Acurácia Stop Words: ")
+    print(classificar_texto(reviews, "stop_words", "a11y"))
+    # Desenha o gráfico de frequências após retirar as stop_wprds
+    functions_aux.word_frequency(reviews, "stop_words", "stop_words")
+    print("---")
 
-reviews["stemming"] = stemming_word(reviews, "stop_words_punctuation")
-# Acurácia após retirar as stopwords
-functions_aux.word_frequency(reviews, "stemming", "stemming")
+    reviews["stop_words_punctuation"] = remove_punctuation(reviews, "stop_words")
+    # Acurácia após retirar as stopwords
+    print("Acurácia sem pontuação: ")
+    print(classificar_texto(reviews, "stop_words_punctuation", "a11y"))
+    functions_aux.word_frequency(reviews, "stop_words_punctuation", "stop_words_punctuation")
+    print("---")
 
-print("===")
-print(classificar_texto(reviews, "stemming", "a11y"))
-print("===")
-print(classificar_texto_tfidf(reviews, "stemming", "a11y"))
-print("===")
-acuracia, pesos = classificar_texto_ngrams(reviews, "stemming", "a11y")
-print(acuracia)
-print(pesos.nlargest(10,0))
+    reviews["stemming"] = stemming_word(reviews, "stop_words_punctuation")
+    # Acurácia após retirar as stopwords
+    functions_aux.word_frequency(reviews, "stemming", "stemming")
 
-# def start():
-#     pass
+    print("Logistic Regression:")
+    print(classificar_texto(reviews, "stemming", "a11y"))
+    print("Tfidf:")
+    print(classificar_texto_tfidf(reviews, "stemming", "a11y"))
+    print("Tfidf ngram:")
+    acuracia, pesos = classificar_texto_ngrams(reviews, "stemming", "a11y")
+    print(acuracia)
+    print(pesos.nlargest(10,0))
 
-# if __name__ == "__main__":
-#     start()
-
-#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-#     print(">> Logistic Regression")
-#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">> Support Vector Machine")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
 
-#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-#     print(">> Support Vector Machine")
-#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">> K-nearest neighbors algorithm")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
 
-#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-#     print(">> K-nearest neighbors algorithm")
-#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-
-
-#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-#     print(">> Stochastic Gradient Descent")
-#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(">> Stochastic Gradient Descent")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
