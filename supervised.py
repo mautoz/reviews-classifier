@@ -2,21 +2,23 @@ import os
 import re
 import unidecode
 import pandas as pd 
+import numpy as np
 from string import punctuation
 
 import nltk 
 from nltk import tokenize
-from sklearn.feature_extraction.text import TfidfVectorizer 
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import SGDClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer 
+from sklearn.model_selection import train_test_split, cross_validate, StratifiedKFold
+from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.utils import shuffle
 from sklearn.svm import SVC
-
 
 from helpers import db_aux, functions_aux
 
+
+SEED = 2020
+np.random.seed(SEED)
 
 # A linha abaixo deve ser executada na primeira vez, após o download pode comentar
 # para não ficar executando novamente.
@@ -263,6 +265,97 @@ def classificar_texto_kn_ngrams(texto, coluna_texto, coluna_classificacao):
 
     return kn.score(teste, classe_teste)
 
+def cross_validate_lr(texto, coluna_texto, coluna_classificacao):
+    vetorizar = CountVectorizer(lowercase=False, max_features=50)
+    bag_of_words = vetorizar.fit_transform(texto[coluna_texto])
+
+    cv = StratifiedKFold(n_splits = 5, shuffle = True)
+
+    modelo = LogisticRegression()
+    results = cross_validate(modelo, bag_of_words, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia LogisticRegression() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+    modelo_2 = KNeighborsClassifier()
+    results = cross_validate(modelo_2, bag_of_words, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia KNeighborsClassifier() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+    modelo_3 = SVC()
+    results = cross_validate(modelo_3, bag_of_words, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia SVC() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+    modelo_4 = SGDClassifier()
+    results = cross_validate(modelo_4, bag_of_words, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia SGDClassifier() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+def cross_validate_lr_tfidf(texto, coluna_texto, coluna_classificacao):
+    tfidf = TfidfVectorizer(lowercase=False, max_features=50)
+    bag_of_words = tfidf.fit_transform(texto[coluna_texto])
+
+    cv = StratifiedKFold(n_splits = 5, shuffle = True)
+
+    modelo = LogisticRegression()
+    results = cross_validate(modelo, bag_of_words, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia LogisticRegression() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+    modelo_2 = KNeighborsClassifier()
+    results = cross_validate(modelo_2, bag_of_words, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia KNeighborsClassifier() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+    modelo_3 = SVC()
+    results = cross_validate(modelo_3, bag_of_words, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia SVC() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+    modelo_4 = SGDClassifier()
+    results = cross_validate(modelo_4, bag_of_words, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia SGDClassifier() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+
+def cross_validate_lr_tfidf_ngram(texto, coluna_texto, coluna_classificacao):
+    tfidf = TfidfVectorizer(lowercase=False, ngram_range= (1,2))
+    vector_tfidf = tfidf.fit_transform(texto[coluna_texto])
+
+    cv = StratifiedKFold(n_splits = 5, shuffle = True)
+
+    modelo = LogisticRegression()
+    results = cross_validate(modelo, vector_tfidf, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia LogisticRegression() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+    modelo_2 = KNeighborsClassifier()
+    results = cross_validate(modelo_2, vector_tfidf, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia KNeighborsClassifier() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+    modelo_3 = SVC()
+    results = cross_validate(modelo_3, vector_tfidf, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia SVC() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
+    modelo_4 = SGDClassifier()
+    results = cross_validate(modelo_4, vector_tfidf, texto[coluna_classificacao], cv = cv, return_train_score=False)
+    media = results['test_score'].mean()
+    desvio_padrao = results['test_score'].std()
+    print("Acurácia SGDClassifier() [%.2f, %.2f]" % ((media - 2 *desvio_padrao) * 100, (media + 2 * desvio_padrao) * 100))
+
 
 if __name__ == "__main__":
 
@@ -497,3 +590,15 @@ if __name__ == "__main__":
     print(classificar_texto_sgdc_tfidf(reviews, "stemming", "a11y"))
     print("Acurácia - Após stemming (Tfidf Vectorizer ngram)")
     print(classificar_texto_sgdc_ngrams(reviews, "stemming", "a11y"))
+
+    
+    print(">>> Validação Cruzada <<<")
+    
+    print("> Count Vectorizer <")
+    cross_validate_lr(reviews, "stemming", "a11y")
+
+    print("> Tf-idf sem ngram <")
+    cross_validate_lr_tfidf(reviews, "stemming", "a11y")
+
+    print("> Tf-idf com ngram <")
+    cross_validate_lr_tfidf_ngram(reviews, "stemming", "a11y")
