@@ -1,9 +1,16 @@
 #! /bin/bash
 
-export POSTGRES_HOST=localhost
-export POSTGRES_DATABASE=reviews-classifier
-export POSTGRES_USER=postgres
-export POSTGRES_PASSWORD=versatushpc
+# Preencha os dados abaixo com as especificações do seu postgres.
+# O padrão pode ser:
+# export POSTGRES_HOST=localhost
+# export POSTGRES_DATABASE=reviews-classifier
+# export POSTGRES_USER=postgres
+export POSTGRES_HOST=
+export POSTGRES_DATABASE=
+export POSTGRES_USER=
+export POSTGRES_PASSWORD=
+# Padrão pode ser:
+# export POSTGRES_PORT=5432
 export POSTGRES_PORT=5432
 
 # Três datasets do Kaggle que podem ser usados para o treinamento da máquina.
