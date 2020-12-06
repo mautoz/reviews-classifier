@@ -29,11 +29,11 @@ Bibliotecas
 
 2. É possível começar o treino de máquina com os reviews do Kaggle. No [README](./csv/README.md) da pasta csv estão as fonte dos três bancos de dados usado. É só baixar e colocar os arquivos nas pastas correspondentes. São arquivos grandes, por essa razão, a inserção pode demorar bastante.
 
-3. Se você for utilizar os datasets do item 2, então execute os códigos: google_apps_reader.py, python3 google_apps_extended_reader.py, python3 android_app_dataset_reader.py. É só "descomentar" no [run](./run).
+3. Se você for utilizar os datasets do item 2, então execute os códigos: google_apps_reader.py, python3 google_apps_extended_reader.py, python3 android_app_dataset_reader.py. É só "descomentar" no [run](./run.sh).
 
-4. Ainda no [run](./run), preencha as variáveis do Postgres com as informações da sua máquina!
+4. Ainda no [run](./run.sh), preencha as variáveis do Postgres com as informações da sua máquina!
 
-5. Com o dataset já carregados no bd, agora é só executar o unsupervised.py ou supervised.py, para obter os resultados. Execute-os, assim como os códigos do item 3, pelo [run](run), que carregará as variáveis. Exemplo:
+5. Com o dataset já carregados no bd, agora é só executar o unsupervised.py ou supervised.py, para obter os resultados. Execute-os, assim como os códigos do item 3, pelo [run](./run.sh), que carregará as variáveis. Exemplo:
 ```
 $ bash run
 ```
